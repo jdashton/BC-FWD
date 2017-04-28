@@ -53,4 +53,29 @@ defmodule IslandsEngine.Player do
     new_coordinates = convert_coordinates(board, coordinates)
     IslandSet.set_island_coordinates(island_set, island, new_coordinates)
   end
+  
+  def guess_coordinate(opponent_board, coordinate) do
+    Board.guess_coordinate(opponent_board, coordinate)
+    case Board.coordinate_hit?(opponent_board, coordinate) do
+      true  -> :hit
+      false -> :miss
+    end
+  end
+  
+  def forested_island(opponent, coordinate) do
+    board = Player.get_board(opponent)
+    island_key = Board.coordinate_island(board, coordinate)
+    island_set = Player.get_island_set(opponent)
+    
+    case IslandSet.forested?(island_set, island_key) do
+      true  -> island_key
+      false -> :none
+    end
+  end
+  
+  def win?(opponent) do
+    opponent
+    |> Player.get_island_set()
+    |> IslandSet.all_forested?()
+  end
 end
