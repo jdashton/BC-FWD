@@ -34,12 +34,16 @@ defmodule IslandsEngine.Game do
     |> win_check(opponent, state)
   end
   
+  def handle_cast(:stop, state) do
+    {:stop, :normal, state}
+  end
+  
   def call_demo(game) do
     GenServer.call(game, :demo)
   end
 
-  def start_link(name) when not is_nil name do
-    GenServer.start_link(__MODULE__, name)
+  def start_link(name) when is_binary(name) and byte_size(name) > 0 do
+    GenServer.start_link(__MODULE__, name, name: {:global, "game:#{name}"})
   end
 
   def init(name) do
@@ -87,5 +91,9 @@ defmodule IslandsEngine.Game do
         false -> :no_win
       end
     {:reply, {:hit, island_key, win_status}, state}
+  end
+  
+  def stop(pid) do
+    GenServer.cast(pid, :stop)
   end
 end
